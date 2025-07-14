@@ -18,14 +18,14 @@
   #player {
     width: 100vw;
     height: 100vh;
-    position: relative; /* <--- agregar esto */
+    position: relative;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
-  /* Centrar botón play grande */
   .playback {
-    position: absolute !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    position: static !important;
+    transform: none !important;
     z-index: 10 !important;
   }
 </style>
