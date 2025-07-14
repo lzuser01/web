@@ -20,7 +20,7 @@
     position:relative;
   }
   #custom-controls {
-    position: fixed;
+    position: absolute;
     top: 50%;
     left: 0;
     right: 0;
@@ -31,7 +31,7 @@
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 99999;
+    z-index: 9999;
   }
   #custom-controls.visible {
     pointer-events: auto;
@@ -83,7 +83,7 @@
       width: "100%",
       height: "100%",
       autoPlay: false,
-      poster: "https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg",
+      poster: "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
       mute: false,
       mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
     });
@@ -91,9 +91,6 @@
     var controls = document.getElementById("custom-controls");
     var hideTimeout;
     var isHovering = false;
-
-    // Insertamos controles en el body para que estén siempre visibles en fullscreen
-    document.body.appendChild(controls);
 
     function showControls() {
       controls.classList.add("visible");
@@ -110,22 +107,25 @@
       if (hideTimeout) clearTimeout(hideTimeout);
     }
 
-    // Mostrar controles cuando inicia reproducción
-    player.listenTo(player, Clappr.Events.PLAYER_PLAY, function () {
-      showControls();
+    // Esperamos a que Clappr cree el contenedor
+    player.listenTo(player, Clappr.Events.PLAYER_READY, () => {
+      var clapprContainer = document.querySelector("#player .player");
+      if (clapprContainer) {
+        clapprContainer.style.position = "relative"; // Para que posición absolute funcione
+        clapprContainer.appendChild(controls); // Ponemos los controles dentro del player
+      }
     });
 
-    // Detectar click en el botón play interno de Clappr (overlay play)
-    document.addEventListener("click", function (e) {
-      if (
-        e.target.classList.contains("playback") ||
-        e.target.closest(".playback")
-      ) {
+    player.listenTo(player, Clappr.Events.PLAYER_PLAY, () => showControls());
+
+    // Mostrar controles al tocar play overlay
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("playback") || e.target.closest(".playback")) {
         showControls();
       }
     });
 
-    // Mostrar controles y reiniciar timeout al mover mouse
+    // Mostrar controles al mover mouse
     let mouseMoveTimeout;
     window.addEventListener("mousemove", () => {
       showControls();
@@ -135,7 +135,6 @@
       }, 5000);
     });
 
-    // Detectar hover o foco en los botones para no ocultarlos
     controls.addEventListener("mouseenter", () => {
       isHovering = true;
       if (hideTimeout) clearTimeout(hideTimeout);
@@ -143,12 +142,9 @@
     });
     controls.addEventListener("mouseleave", () => {
       isHovering = false;
-      hideTimeout = setTimeout(() => {
-        controls.classList.remove("visible");
-      }, 5000);
+      hideTimeout = setTimeout(() => controls.classList.remove("visible"), 5000);
     });
 
-    // Soporte para touchstart (móvil)
     controls.addEventListener("touchstart", () => {
       isHovering = true;
       if (hideTimeout) clearTimeout(hideTimeout);
@@ -156,20 +152,18 @@
     });
     controls.addEventListener("touchend", () => {
       isHovering = false;
-      hideTimeout = setTimeout(() => {
-        controls.classList.remove("visible");
-      }, 5000);
+      hideTimeout = setTimeout(() => controls.classList.remove("visible"), 5000);
     });
 
     // Ocultar controles al hacer click fuera de ellos
-    document.addEventListener("click", function (e) {
+    document.addEventListener("click", (e) => {
       if (!controls.contains(e.target)) {
         hideControls();
       }
     });
 
-    // Mostrar u ocultar controles al cambiar fullscreen
-    player.listenTo(player, Clappr.Events.PLAYER_FULLSCREEN, function (isFullscreen) {
+    // Control visibilidad al entrar/salir fullscreen
+    player.listenTo(player, Clappr.Events.PLAYER_FULLSCREEN, (isFullscreen) => {
       if (isFullscreen) {
         showControls();
       } else {
@@ -177,22 +171,22 @@
       }
     });
 
-    // Botones de retroceder y adelantar
-    document.getElementById("retroceder").addEventListener("click", function (e) {
+    // Botones retroceder y adelantar
+    document.getElementById("retroceder").addEventListener("click", (e) => {
       e.stopPropagation();
       var current = player.getCurrentTime();
       player.seek(Math.max(current - 10, 0));
     });
 
-    document.getElementById("adelantar").addEventListener("click", function (e) {
+    document.getElementById("adelantar").addEventListener("click", (e) => {
       e.stopPropagation();
       var current = player.getCurrentTime();
       var duration = player.getDuration();
       player.seek(Math.min(current + 10, duration));
     });
+
   } else {
-    document.body.innerHTML =
-      '<p class="text-white text-center text-xl">❌ Enlace inválido</p>';
+    document.body.innerHTML = '<p class="text-white text-center text-xl">❌ Enlace inválido</p>';
   }
 </script>
 </body>
