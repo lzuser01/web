@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Clappr + Adelantar y Retroceder</title>
+  <title>Clappr Player Fullscreen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
@@ -21,23 +21,6 @@
       height: 100vh;
       position: relative;
     }
-
-    .playback {
-      position: absolute !important;
-      top: 50% !important;
-      left: 50% !important;
-      transform: translate(-50%, -50%) !important;
-      z-index: 9999 !important;
-    }
-
-    .control-button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 16px;
-      margin: 0 8px;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -47,16 +30,6 @@
     function obtenerParametro(nombre) {
       var params = new URLSearchParams(window.location.search);
       return params.get(nombre);
-    }
-
-    function esperarElemento(selector, callback) {
-      const interval = setInterval(() => {
-        const el = document.querySelector(selector);
-        if (el) {
-          clearInterval(interval);
-          callback(el);
-        }
-      }, 200);
     }
 
     var codificado = obtenerParametro("video");
@@ -69,7 +42,7 @@
         width: "100%",
         height: "100%",
         autoPlay: false,
-        poster: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZphq42aDUEjnjvAQmMox6J08sVZwc_UPULcPzN6U-5xKFvP8EuaAnimaunSWD-OJgFFl3fbwC6Xs59gBY9QXXvQzlpTBOIIHVKMCvC10mHVEiSiDp94powL6koSsgmIHDBF67cwiFAxQoy4eEsWIPDygVdSZ-x-s1-yKTBmk9LxCtwGeZKJUl1TI6uBs/s720/IMG-20250328-WA0019.jpg",
+        poster: "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
       });
@@ -83,31 +56,8 @@
           playbackBtn.style.transform = "translate(-50%, -50%)";
           playbackBtn.style.zIndex = "9999";
         }
-
-        // Esperar a que aparezca el panel de controles
-        esperarElemento('.media-control-left-panel', function (panel) {
-          if (panel.querySelector('.custom-controls')) return; // evitar duplicados
-
-          const backBtn = document.createElement('button');
-          backBtn.className = 'control-button custom-controls';
-          backBtn.textContent = '⏪ 10s';
-          backBtn.onclick = function () {
-            const current = player.getCurrentTime();
-            player.seek(Math.max(0, current - 10));
-          };
-
-          const forwardBtn = document.createElement('button');
-          forwardBtn.className = 'control-button custom-controls';
-          forwardBtn.textContent = '10s ⏩';
-          forwardBtn.onclick = function () {
-            const current = player.getCurrentTime();
-            player.seek(current + 10);
-          };
-
-          panel.insertBefore(backBtn, panel.firstChild);
-          panel.appendChild(forwardBtn);
-        });
       });
+
     } else {
       document.body.innerHTML = '<p class="text-white text-center text-xl">❌ Enlace inválido</p>';
     }
