@@ -117,14 +117,40 @@
         }
       }
 
+      // Mostrar controles cuando inicia reproducción (evento oficial)
+      player.listenTo(player, Clappr.Events.PLAYER_PLAY, function () {
+        showControls();
+      });
+
+      // Detectar click en el botón play interno de Clappr (overlay play)
+      // Este botón tiene clase 'playback'
+      document.addEventListener("click", function (e) {
+        if (
+          e.target.classList.contains("playback") ||
+          e.target.closest(".playback")
+        ) {
+          showControls();
+        }
+      });
+
       // Mostrar controles al hacer click o toque en cualquier parte del body
       document.body.addEventListener("click", showControls);
+
+      // Mostrar controles y reiniciar timeout al mover mouse
+      let mouseMoveTimeout;
+      window.addEventListener("mousemove", () => {
+        showControls();
+        if (mouseMoveTimeout) clearTimeout(mouseMoveTimeout);
+        mouseMoveTimeout = setTimeout(() => {
+          if (!isHovering) controls.classList.remove("visible");
+        }, 5000);
+      });
 
       // Detectar hover o foco en los botones para no ocultarlos
       controls.addEventListener("mouseenter", () => {
         isHovering = true;
         if (hideTimeout) clearTimeout(hideTimeout);
-        controls.classList.add("visible"); // asegurar que están visibles
+        controls.classList.add("visible");
       });
       controls.addEventListener("mouseleave", () => {
         isHovering = false;
