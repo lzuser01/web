@@ -15,13 +15,11 @@
       width: 100%;
       overflow: hidden;
     }
-
     #player {
       width: 100vw;
       height: 100vh;
       position: relative;
     }
-
     .playback {
       position: absolute !important;
       top: 50% !important;
@@ -29,14 +27,14 @@
       transform: translate(-50%, -50%) !important;
       z-index: 9999 !important;
     }
-
-    .clappr-backward, .clappr-forward {
+    .custom-control-button {
       background: none;
       border: none;
       color: white;
-      font-size: 18px;
+      font-size: 16px;
+      padding: 6px;
+      margin: 0 5px;
       cursor: pointer;
-      margin: 0 10px;
     }
   </style>
 </head>
@@ -49,49 +47,39 @@
       return params.get(nombre);
     }
 
-    // Plugin de Retroceder
-    var BackwardPlugin = Clappr.UIContainerPlugin.extend({
-      name: 'backward',
-      attributes: {
-        class: 'clappr-backward-container'
-      },
-      initialize: function() {
-        this.render();
-      },
-      render: function() {
-        this.el.innerHTML = '<button class="clappr-backward" title="Retroceder 10s">⏪ 10s</button>';
-        this.el.style.display = 'flex';
-        this.el.style.alignItems = 'center';
-        this.el.style.marginLeft = '10px';
-        this.el.onclick = () => {
-          var time = this.container.playback.getCurrentTime() - 10;
-          this.container.playback.seek(Math.max(time, 0));
-        };
-        return this;
-      }
-    });
+    // Plugin con botones en la control bar
+    class CustomSeekPlugin extends Clappr.UIContainerPlugin {
+      get name() { return 'custom_seek_plugin' }
 
-    // Plugin de Adelantar
-    var ForwardPlugin = Clappr.UIContainerPlugin.extend({
-      name: 'forward',
-      attributes: {
-        class: 'clappr-forward-container'
-      },
-      initialize: function() {
-        this.render();
-      },
-      render: function() {
-        this.el.innerHTML = '<button class="clappr-forward" title="Adelantar 10s">10s ⏩</button>';
-        this.el.style.display = 'flex';
-        this.el.style.alignItems = 'center';
-        this.el.style.marginLeft = '10px';
-        this.el.onclick = () => {
-          var time = this.container.playback.getCurrentTime() + 10;
-          this.container.playback.seek(time);
-        };
-        return this;
+      bindEvents() {
+        this.listenTo(this.container, Clappr.Events.CONTAINER_PLAY, this.onPlay)
       }
-    });
+
+      onPlay() {
+        const controlBar = this.container.$el.find('.media-control-left-panel')[0]
+
+        if (!controlBar || controlBar.querySelector('.custom-backward')) return
+
+        const backBtn = document.createElement('button')
+        backBtn.className = 'custom-control-button custom-backward'
+        backBtn.innerText = '⏪ 10s'
+        backBtn.onclick = () => {
+          const current = this.container.playback.getCurrentTime()
+          this.container.playback.seek(Math.max(0, current - 10))
+        }
+
+        const forwardBtn = document.createElement('button')
+        forwardBtn.className = 'custom-control-button custom-forward'
+        forwardBtn.innerText = '10s ⏩'
+        forwardBtn.onclick = () => {
+          const current = this.container.playback.getCurrentTime()
+          this.container.playback.seek(current + 10)
+        }
+
+        controlBar.insertBefore(backBtn, controlBar.firstChild)
+        controlBar.appendChild(forwardBtn)
+      }
+    }
 
     var codificado = obtenerParametro("video");
     if (codificado) {
@@ -103,10 +91,10 @@
         width: "100%",
         height: "100%",
         autoPlay: false,
-        poster: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZphq42aDUEjnjvAQmMox6J08sVZwc_UPULcPzN6U-5xKFvP8EuaAnimaunSWD-OJgFFl3fbwC6Xs59gBY9QXXvQzlpTBOIIHVKMCvC10mHVEiSiDp94powL6koSsgmIHDBF67cwiFAxQoy4eEsWIPDygVdSZ-x-s1-yKTBmk9LxCtwGeZKJUl1TI6uBs/s720/IMG-20250328-WA0019.jpg",
+        poster: "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
-        plugins: [BackwardPlugin, ForwardPlugin],
+        plugins: [CustomSeekPlugin],
       });
 
       player.listenTo(player, Clappr.Events.PLAYER_READY, function () {
