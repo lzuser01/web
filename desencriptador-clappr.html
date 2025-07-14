@@ -26,7 +26,7 @@
       position: relative;
     }
     #custom-controls {
-      position: fixed;
+      position: absolute;
       top: 50%;
       width: 100%;
       transform: translateY(-50%);
@@ -34,9 +34,9 @@
       justify-content: space-between;
       padding: 0 20px;
       pointer-events: none;
-      z-index: 9999;
       opacity: 0;
       transition: opacity 0.3s ease;
+      z-index: 9999;
     }
     #custom-controls.visible {
       pointer-events: auto;
@@ -63,7 +63,7 @@
 <body>
   <div id="player"></div>
 
-  <!-- Botones flotantes (los moveremos dinámicamente dentro de #player) -->
+  <!-- Botones flotantes (los moveremos dentro del contenedor interno de Clappr) -->
   <div id="custom-controls">
     <button
       id="retroceder"
@@ -98,18 +98,23 @@
         height: "100%",
         autoPlay: false,
         poster:
-          "https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg",
+          "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
       });
 
       var controls = document.getElementById("custom-controls");
-      var playerContainer = document.getElementById("player");
       var hideTimeout;
       var isHovering = false;
 
-      // Mover controles dentro del contenedor #player para que formen parte del fullscreen
-      playerContainer.appendChild(controls);
+      // Esperamos que Clappr haya generado su contenedor interno (.player)
+      player.listenTo(player, Clappr.Events.PLAYER_READY, function () {
+        var clapprContainer = document.querySelector("#player .player");
+        if (clapprContainer) {
+          clapprContainer.style.position = "relative"; // asegurar posición relativa para absolute controls
+          clapprContainer.appendChild(controls);
+        }
+      });
 
       function showControls() {
         controls.classList.add("visible");
