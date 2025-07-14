@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador Clappr</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-black text-white min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-xl bg-gray-900 rounded-2xl shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-4 text-center text-yellow-400">🔐 Generador Clappr Encriptado</h1>
+    <label class="block mb-2">🎬 Enlace del video MP4:</label>
+    <input id="videoUrl" type="text" placeholder="https://servidor.com/video.mp4" class="w-full p-3 rounded bg-gray-800 text-white outline-none mb-4" />
+    
+    <button onclick="generar()" class="bg-yellow-500 hover:bg-yellow-600 text-black px-4 py-2 rounded w-full font-bold">Generar enlace seguro</button>
+    
+    <div id="resultado" class="mt-6 hidden">
+      <label class="block mb-2 mt-4">🔗 Enlace generado:</label>
+      <input id="linkFinal" readonly class="w-full p-3 rounded bg-gray-700 text-white mb-2" />
+      <button onclick="copiar()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded w-full font-bold">📋 Copiar enlace</button>
+    </div>
+  </div>
+
+  <script>
+    function generar() {
+      var url = document.getElementById('videoUrl').value.trim();
+      if (!url) return alert("Ingresa un enlace válido");
+
+      var codificado = btoa(url);
+      var final = "https://lzuser01.github.io/web/desencriptador-clappr.html?video=" + codificado;
+      document.getElementById('linkFinal').value = final;
+      document.getElementById('resultado').classList.remove('hidden');
+    }
+
+    function copiar() {
+      var enlace = document.getElementById("linkFinal");
+      enlace.select();
+      document.execCommand("copy");
+      alert("¡Enlace copiado!");
+    }
+  </script>
+</body>
+</html>
