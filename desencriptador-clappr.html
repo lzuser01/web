@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Clappr con Adelantar y Retroceder</title>
+  <title>Clappr con Avanzar y Retroceder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
@@ -27,13 +27,13 @@
       transform: translate(-50%, -50%) !important;
       z-index: 9999 !important;
     }
-    .custom-control-button {
+
+    .control-button {
       background: none;
       border: none;
       color: white;
       font-size: 16px;
-      padding: 6px;
-      margin: 0 5px;
+      margin: 0 8px;
       cursor: pointer;
     }
   </style>
@@ -47,30 +47,31 @@
       return params.get(nombre);
     }
 
-    // Plugin con botones en la control bar
-    class CustomSeekPlugin extends Clappr.UIContainerPlugin {
-      get name() { return 'custom_seek_plugin' }
+    // Plugin para agregar botones de control
+    class SeekButtonsPlugin extends Clappr.UIPlugin {
+      get name() { return 'seek_buttons_plugin' }
 
       bindEvents() {
-        this.listenTo(this.container, Clappr.Events.CONTAINER_PLAY, this.onPlay)
+        this.listenTo(this.container, Clappr.Events.CONTAINER_PLAY, this.addButtons)
       }
 
-      onPlay() {
+      addButtons() {
         const controlBar = this.container.$el.find('.media-control-left-panel')[0]
+        if (!controlBar || controlBar.querySelector('.control-button')) return
 
-        if (!controlBar || controlBar.querySelector('.custom-backward')) return
-
+        // Botón de retroceder
         const backBtn = document.createElement('button')
-        backBtn.className = 'custom-control-button custom-backward'
-        backBtn.innerText = '⏪ 10s'
+        backBtn.className = 'control-button'
+        backBtn.textContent = '⏪ 10s'
         backBtn.onclick = () => {
           const current = this.container.playback.getCurrentTime()
           this.container.playback.seek(Math.max(0, current - 10))
         }
 
+        // Botón de adelantar
         const forwardBtn = document.createElement('button')
-        forwardBtn.className = 'custom-control-button custom-forward'
-        forwardBtn.innerText = '10s ⏩'
+        forwardBtn.className = 'control-button'
+        forwardBtn.textContent = '10s ⏩'
         forwardBtn.onclick = () => {
           const current = this.container.playback.getCurrentTime()
           this.container.playback.seek(current + 10)
@@ -91,10 +92,10 @@
         width: "100%",
         height: "100%",
         autoPlay: false,
-        poster: "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
+        poster: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZphq42aDUEjnjvAQmMox6J08sVZwc_UPULcPzN6U-5xKFvP8EuaAnimaunSWD-OJgFFl3fbwC6Xs59gBY9QXXvQzlpTBOIIHVKMCvC10mHVEiSiDp94powL6koSsgmIHDBF67cwiFAxQoy4eEsWIPDygVdSZ-x-s1-yKTBmk9LxCtwGeZKJUl1TI6uBs/s720/IMG-20250328-WA0019.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
-        plugins: [CustomSeekPlugin],
+        plugins: [SeekButtonsPlugin],
       });
 
       player.listenTo(player, Clappr.Events.PLAYER_READY, function () {
