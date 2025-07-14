@@ -44,17 +44,19 @@
     }
     .control-btn {
       color: white;
-      background-color: rgba(255, 193, 7, 0.8); /* amarillo con opacidad */
+      background-color: rgba(102, 102, 102, 0.8); /* gris semitransparente */
       padding: 12px 18px;
       border-radius: 50%;
-      box-shadow: 0 0 10px rgba(255, 193, 7, 0.7);
+      box-shadow: 0 0 10px rgba(102, 102, 102, 0.7);
       font-size: 24px;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.2s ease;
     }
-    .control-btn:hover {
-      background-color: rgba(255, 193, 7, 1);
+    .control-btn:hover,
+    .control-btn:focus {
+      background-color: rgba(150, 150, 150, 0.9);
+      outline: none;
     }
   </style>
 </head>
@@ -63,10 +65,18 @@
 
   <!-- Botones flotantes -->
   <div id="custom-controls">
-    <button id="retroceder" class="control-btn" aria-label="Retroceder 10 segundos">
+    <button
+      id="retroceder"
+      class="control-btn"
+      aria-label="Retroceder 10 segundos"
+    >
       <i class="fas fa-backward"></i>
     </button>
-    <button id="adelantar" class="control-btn" aria-label="Adelantar 10 segundos">
+    <button
+      id="adelantar"
+      class="control-btn"
+      aria-label="Adelantar 10 segundos"
+    >
       <i class="fas fa-forward"></i>
     </button>
   </div>
@@ -87,44 +97,73 @@
         width: "100%",
         height: "100%",
         autoPlay: false,
-        poster: "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
+        poster:
+          "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
       });
 
       var controls = document.getElementById("custom-controls");
       var hideTimeout;
+      var isHovering = false;
 
       function showControls() {
-        // Mostrar controles
         controls.classList.add("visible");
-
-        // Limpiar timeout anterior si existe
         if (hideTimeout) clearTimeout(hideTimeout);
-
-        // Ocultar después de 2 segundos
-        hideTimeout = setTimeout(() => {
-          controls.classList.remove("visible");
-        }, 2000);
+        if (!isHovering) {
+          hideTimeout = setTimeout(() => {
+            controls.classList.remove("visible");
+          }, 5000);
+        }
       }
 
       // Mostrar controles al hacer click o toque en cualquier parte del body
       document.body.addEventListener("click", showControls);
 
+      // Detectar hover o foco en los botones para no ocultarlos
+      controls.addEventListener("mouseenter", () => {
+        isHovering = true;
+        if (hideTimeout) clearTimeout(hideTimeout);
+        controls.classList.add("visible"); // asegurar que están visibles
+      });
+      controls.addEventListener("mouseleave", () => {
+        isHovering = false;
+        // Reiniciar el timeout para ocultar
+        hideTimeout = setTimeout(() => {
+          controls.classList.remove("visible");
+        }, 5000);
+      });
+
+      // Soporte para touchstart (móvil)
+      controls.addEventListener("touchstart", () => {
+        isHovering = true;
+        if (hideTimeout) clearTimeout(hideTimeout);
+        controls.classList.add("visible");
+      });
+      controls.addEventListener("touchend", () => {
+        isHovering = false;
+        hideTimeout = setTimeout(() => {
+          controls.classList.remove("visible");
+        }, 5000);
+      });
+
       // Botones de retroceder y adelantar
-      document.getElementById("retroceder").addEventListener("click", function (e) {
-        e.stopPropagation(); // evitar que el click en el botón también dispare el showControls
-        var current = player.getCurrentTime();
-        player.seek(Math.max(current - 10, 0));
-      });
+      document
+        .getElementById("retroceder")
+        .addEventListener("click", function (e) {
+          e.stopPropagation();
+          var current = player.getCurrentTime();
+          player.seek(Math.max(current - 10, 0));
+        });
 
-      document.getElementById("adelantar").addEventListener("click", function (e) {
-        e.stopPropagation();
-        var current = player.getCurrentTime();
-        var duration = player.getDuration();
-        player.seek(Math.min(current + 10, duration));
-      });
-
+      document
+        .getElementById("adelantar")
+        .addEventListener("click", function (e) {
+          e.stopPropagation();
+          var current = player.getCurrentTime();
+          var duration = player.getDuration();
+          player.seek(Math.min(current + 10, duration));
+        });
     } else {
       document.body.innerHTML =
         '<p class="text-white text-center text-xl">❌ Enlace inválido</p>';
