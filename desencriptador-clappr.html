@@ -44,7 +44,7 @@
     }
     .control-btn {
       color: white;
-      background-color: rgba(102, 102, 102, 0.8); /* gris semitransparente */
+      background-color: rgba(102, 102, 102, 0.8);
       padding: 12px 18px;
       border-radius: 50%;
       box-shadow: 0 0 10px rgba(102, 102, 102, 0.7);
@@ -63,7 +63,7 @@
 <body>
   <div id="player"></div>
 
-  <!-- Botones flotantes -->
+  <!-- Botones flotantes (los moveremos dinámicamente dentro de #player) -->
   <div id="custom-controls">
     <button
       id="retroceder"
@@ -98,14 +98,18 @@
         height: "100%",
         autoPlay: false,
         poster:
-          "https://image.tmdb.org/t/p/original/ApRxyHFuvv5yghedxXPJSm9FEDe.jpg",
+          "https://image.tmdb.org/t/p/original/fQOV47FHTJdaSuSUNlzP3zXUZWE.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
       });
 
       var controls = document.getElementById("custom-controls");
+      var playerContainer = document.getElementById("player");
       var hideTimeout;
       var isHovering = false;
+
+      // Mover controles dentro del contenedor #player para que formen parte del fullscreen
+      playerContainer.appendChild(controls);
 
       function showControls() {
         controls.classList.add("visible");
@@ -117,13 +121,17 @@
         }
       }
 
-      // Mostrar controles cuando inicia reproducción (evento oficial)
+      function hideControls() {
+        controls.classList.remove("visible");
+        if (hideTimeout) clearTimeout(hideTimeout);
+      }
+
+      // Mostrar controles cuando inicia reproducción
       player.listenTo(player, Clappr.Events.PLAYER_PLAY, function () {
         showControls();
       });
 
       // Detectar click en el botón play interno de Clappr (overlay play)
-      // Este botón tiene clase 'playback'
       document.addEventListener("click", function (e) {
         if (
           e.target.classList.contains("playback") ||
@@ -132,9 +140,6 @@
           showControls();
         }
       });
-
-      // Mostrar controles al hacer click o toque en cualquier parte del body
-      document.body.addEventListener("click", showControls);
 
       // Mostrar controles y reiniciar timeout al mover mouse
       let mouseMoveTimeout;
@@ -154,7 +159,6 @@
       });
       controls.addEventListener("mouseleave", () => {
         isHovering = false;
-        // Reiniciar el timeout para ocultar
         hideTimeout = setTimeout(() => {
           controls.classList.remove("visible");
         }, 5000);
@@ -171,6 +175,22 @@
         hideTimeout = setTimeout(() => {
           controls.classList.remove("visible");
         }, 5000);
+      });
+
+      // Ocultar controles al hacer click fuera de ellos
+      document.addEventListener("click", function (e) {
+        if (!controls.contains(e.target)) {
+          hideControls();
+        }
+      });
+
+      // Mostrar u ocultar controles al cambiar fullscreen
+      player.listenTo(player, Clappr.Events.PLAYER_FULLSCREEN, function (isFullscreen) {
+        if (isFullscreen) {
+          showControls();
+        } else {
+          hideControls();
+        }
       });
 
       // Botones de retroceder y adelantar
