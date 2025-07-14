@@ -6,30 +6,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
-<style>
-  html, body {
-    margin: 0;
-    padding: 0;
-    background-color: black;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-  }
-  #player {
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-  }
-  .playback {
-    position: static !important;
-    transform: none !important;
-    z-index: 10 !important;
-  }
-</style>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: black;
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+    }
 
+    #player {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      background-image: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZphq42aDUEjnjvAQmMox6J08sVZwc_UPULcPzN6U-5xKFvP8EuaAnimaunSWD-OJgFFl3fbwC6Xs59gBY9QXXvQzlpTBOIIHVKMCvC10mHVEiSiDp94powL6koSsgmIHDBF67cwiFAxQoy4eEsWIPDygVdSZ-x-s1-yKTBmk9LxCtwGeZKJUl1TI6uBs/s720/IMG-20250328-WA0019.jpg');
+      background-size: cover;
+      background-position: center;
+    }
+  </style>
 </head>
 <body>
   <div id="player"></div>
@@ -50,10 +45,22 @@
         width: "100%",
         height: "100%",
         autoPlay: false,
-        poster: "",
+        poster: "", // Puedes usar poster si quieres una imagen encima del fondo
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
       });
+
+      player.listenTo(player, Clappr.Events.PLAYER_READY, function () {
+        var playbackBtn = document.querySelector('.playback');
+        if (playbackBtn) {
+          playbackBtn.style.position = "absolute";
+          playbackBtn.style.top = "50%";
+          playbackBtn.style.left = "50%";
+          playbackBtn.style.transform = "translate(-50%, -50%)";
+          playbackBtn.style.zIndex = "9999";
+        }
+      });
+
     } else {
       document.body.innerHTML = '<p class="text-white text-center text-xl">❌ Enlace inválido</p>';
     }
