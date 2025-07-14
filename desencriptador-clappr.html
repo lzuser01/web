@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Clappr Player Fullscreen</title>
+  <title>Clappr con Adelantar y Retroceder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
@@ -21,6 +21,23 @@
       height: 100vh;
       position: relative;
     }
+
+    .playback {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      z-index: 9999 !important;
+    }
+
+    .clappr-backward, .clappr-forward {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      margin: 0 10px;
+    }
   </style>
 </head>
 <body>
@@ -31,6 +48,50 @@
       var params = new URLSearchParams(window.location.search);
       return params.get(nombre);
     }
+
+    // Plugin de Retroceder
+    var BackwardPlugin = Clappr.UIContainerPlugin.extend({
+      name: 'backward',
+      attributes: {
+        class: 'clappr-backward-container'
+      },
+      initialize: function() {
+        this.render();
+      },
+      render: function() {
+        this.el.innerHTML = '<button class="clappr-backward" title="Retroceder 10s">⏪ 10s</button>';
+        this.el.style.display = 'flex';
+        this.el.style.alignItems = 'center';
+        this.el.style.marginLeft = '10px';
+        this.el.onclick = () => {
+          var time = this.container.playback.getCurrentTime() - 10;
+          this.container.playback.seek(Math.max(time, 0));
+        };
+        return this;
+      }
+    });
+
+    // Plugin de Adelantar
+    var ForwardPlugin = Clappr.UIContainerPlugin.extend({
+      name: 'forward',
+      attributes: {
+        class: 'clappr-forward-container'
+      },
+      initialize: function() {
+        this.render();
+      },
+      render: function() {
+        this.el.innerHTML = '<button class="clappr-forward" title="Adelantar 10s">10s ⏩</button>';
+        this.el.style.display = 'flex';
+        this.el.style.alignItems = 'center';
+        this.el.style.marginLeft = '10px';
+        this.el.onclick = () => {
+          var time = this.container.playback.getCurrentTime() + 10;
+          this.container.playback.seek(time);
+        };
+        return this;
+      }
+    });
 
     var codificado = obtenerParametro("video");
     if (codificado) {
@@ -45,6 +106,7 @@
         poster: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZphq42aDUEjnjvAQmMox6J08sVZwc_UPULcPzN6U-5xKFvP8EuaAnimaunSWD-OJgFFl3fbwC6Xs59gBY9QXXvQzlpTBOIIHVKMCvC10mHVEiSiDp94powL6koSsgmIHDBF67cwiFAxQoy4eEsWIPDygVdSZ-x-s1-yKTBmk9LxCtwGeZKJUl1TI6uBs/s720/IMG-20250328-WA0019.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
+        plugins: [BackwardPlugin, ForwardPlugin],
       });
 
       player.listenTo(player, Clappr.Events.PLAYER_READY, function () {
