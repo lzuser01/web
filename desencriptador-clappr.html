@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Clappr con Avanzar y Retroceder</title>
+  <title>Clappr + Adelantar y Retroceder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/clappr@latest/dist/clappr.min.js"></script>
@@ -15,11 +15,13 @@
       width: 100%;
       overflow: hidden;
     }
+
     #player {
       width: 100vw;
       height: 100vh;
       position: relative;
     }
+
     .playback {
       position: absolute !important;
       top: 50% !important;
@@ -47,39 +49,14 @@
       return params.get(nombre);
     }
 
-    // Plugin para agregar botones de control
-    class SeekButtonsPlugin extends Clappr.UIPlugin {
-      get name() { return 'seek_buttons_plugin' }
-
-      bindEvents() {
-        this.listenTo(this.container, Clappr.Events.CONTAINER_PLAY, this.addButtons)
-      }
-
-      addButtons() {
-        const controlBar = this.container.$el.find('.media-control-left-panel')[0]
-        if (!controlBar || controlBar.querySelector('.control-button')) return
-
-        // Botón de retroceder
-        const backBtn = document.createElement('button')
-        backBtn.className = 'control-button'
-        backBtn.textContent = '⏪ 10s'
-        backBtn.onclick = () => {
-          const current = this.container.playback.getCurrentTime()
-          this.container.playback.seek(Math.max(0, current - 10))
+    function esperarElemento(selector, callback) {
+      const interval = setInterval(() => {
+        const el = document.querySelector(selector);
+        if (el) {
+          clearInterval(interval);
+          callback(el);
         }
-
-        // Botón de adelantar
-        const forwardBtn = document.createElement('button')
-        forwardBtn.className = 'control-button'
-        forwardBtn.textContent = '10s ⏩'
-        forwardBtn.onclick = () => {
-          const current = this.container.playback.getCurrentTime()
-          this.container.playback.seek(current + 10)
-        }
-
-        controlBar.insertBefore(backBtn, controlBar.firstChild)
-        controlBar.appendChild(forwardBtn)
-      }
+      }, 200);
     }
 
     var codificado = obtenerParametro("video");
@@ -95,7 +72,6 @@
         poster: "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhZphq42aDUEjnjvAQmMox6J08sVZwc_UPULcPzN6U-5xKFvP8EuaAnimaunSWD-OJgFFl3fbwC6Xs59gBY9QXXvQzlpTBOIIHVKMCvC10mHVEiSiDp94powL6koSsgmIHDBF67cwiFAxQoy4eEsWIPDygVdSZ-x-s1-yKTBmk9LxCtwGeZKJUl1TI6uBs/s720/IMG-20250328-WA0019.jpg",
         mute: false,
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
-        plugins: [SeekButtonsPlugin],
       });
 
       player.listenTo(player, Clappr.Events.PLAYER_READY, function () {
@@ -107,8 +83,31 @@
           playbackBtn.style.transform = "translate(-50%, -50%)";
           playbackBtn.style.zIndex = "9999";
         }
-      });
 
+        // Esperar a que aparezca el panel de controles
+        esperarElemento('.media-control-left-panel', function (panel) {
+          if (panel.querySelector('.custom-controls')) return; // evitar duplicados
+
+          const backBtn = document.createElement('button');
+          backBtn.className = 'control-button custom-controls';
+          backBtn.textContent = '⏪ 10s';
+          backBtn.onclick = function () {
+            const current = player.getCurrentTime();
+            player.seek(Math.max(0, current - 10));
+          };
+
+          const forwardBtn = document.createElement('button');
+          forwardBtn.className = 'control-button custom-controls';
+          forwardBtn.textContent = '10s ⏩';
+          forwardBtn.onclick = function () {
+            const current = player.getCurrentTime();
+            player.seek(current + 10);
+          };
+
+          panel.insertBefore(backBtn, panel.firstChild);
+          panel.appendChild(forwardBtn);
+        });
+      });
     } else {
       document.body.innerHTML = '<p class="text-white text-center text-xl">❌ Enlace inválido</p>';
     }
