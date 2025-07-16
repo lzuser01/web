@@ -21,9 +21,6 @@
       width: 100vw;
       height: 100vh;
       position: relative;
-      background-image: url('https://image.tmdb.org/t/p/original/ovZasZ9EeZcp6UsrElkQ63hFCd.jpg');
-      background-size: cover;
-      background-position: center;
     }
   </style>
 </head>
@@ -46,8 +43,8 @@
         width: "100%",
         height: "100%",
         autoPlay: false,
-        poster: "", // Opcional: colocar una imagen como portada
         mute: false,
+        poster: "https://image.tmdb.org/t/p/original/ovZasZ9EeZcp6UsrElkQ63hFCd.jpg", // Cambia esta imagen si deseas
         playback: {
           playInline: true,
           hlsjsConfig: {
@@ -58,6 +55,7 @@
         plugins: [Clappr.HLS],
         mediacontrol: { seekbar: "#ffc107", buttons: "#fff" },
       });
+
     } else {
       document.body.innerHTML = '<p class="text-white text-center text-xl mt-10">❌ Enlace inválido</p>';
     }
